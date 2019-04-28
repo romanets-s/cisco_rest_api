@@ -79,9 +79,15 @@ def index(request):
     #print(users)
     #with open('test.txt', 'w') as f:
     #    f.write(json.dumps(users))
+    usersData = []
     for user in users:
         print(user['macAddress'], user['userName'])
-        if user['mapCoordinate']:
+        if user['macAddress'] and user['mapCoordinate']:
+            usersData.append({'macAddress': user['macAddress'],
+                              'x': user['mapCoordinate']['x'],
+                              'y': user['mapCoordinate']['y'],
+                              'userName': user['userName'],
+                              })
             print(user['mapInfo']['mapHierarchyString'])
             print(user['mapCoordinate'])
             x = user['mapCoordinate']['x']

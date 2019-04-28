@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" media="all" href="/static/style.css" />
+    <title>Worldmap</title>
+</head>
+<body>
+
+<img src="../static/gamebo2.png" class="tetris" usemap="#menumap">
+<table class="table-map">
+    {% for i in length %}
+        <tr>
+        {% for j in width %}
+            <td style="width: {{ width_td }}px; height: {{ hight_td }}px;">
+                {% if i == dict.x and j == dict.y %}
+                    {% if player.bollHere == 1 %}
+                        <span class="player best">0</span>
+                    {% else %}
+                        <span class="player best">X</span>
+                    {% endif %}
+                {% else %}
+                    <span>.</span>
+                {% endif %}
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+<div class="info">
+    <ul>
+        <li>Moviballs: {{ player.boll }}</li>
+        <li>Monstre: {{ player.power }}/{{ player.allMonsters }}</li>
+    </ul>
+</div>
+<form action="\worldmap" method="GET">
+    <input type="hidden" value="up" name="val">
+    <input class="button buttonTop best fixed" type="submit" value=""></input>
+</form>
+<form action="\worldmap" method="GET">
+    <input type="hidden" value="left" name="val">
+    <input class="button buttonLeft best fixed" type="submit" value=""></input>
+</form>
+<form action="\worldmap" method="GET">
+    <input type="hidden" value="right" name="val">
+    <input class="button buttonRight best fixed" type="submit" value=""></input>
+</form>
+<form action="\worldmap" method="GET">
+    <input type="hidden" value="down" name="val">
+    <input class="button buttonDown best fixed" type="submit" value=""></input>
+</form>
+<form action="\moviedex" method="GET">
+    <input type="hidden" value="select" name="val">
+    <input class="button select best fixed" type="submit" value=""></input>
+</form>
+<form action="\options" method="GET">
+    <input type="hidden" value="start" name="val">
+    <input class="button start best fixed" type="submit" value=""></input>
+</form>
+{% if player.bollHere == 1 %}
+    <p class="message">You find Moviballs!</p>
+{% endif %}
+{% if monster %}
+    <p class="message">Pokemon : {{ monster.title }}</p>
+    <a class="buttonA button best" href="\battle\{{ monster.id }}"></a>
+{% endif %}
+</body>
+</html>

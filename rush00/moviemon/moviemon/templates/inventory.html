@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" media="all" href="../static/style.css" />
+    <title>Inventory</title>
+</head>
+<body>
+<div>
+{% for i in array %}
+    {% if i.catch == True %}
+        <div class="film"><a href="{{ i.id }}"><img  src="{{ i.poster }}" style="z-index:999; margin-left:100px; max-width: 160px; max-height: 120px; border: none;"></a></div>
+    {% endif %}
+{% endfor %}
+</div>
+<img src="../static/gamebo2.png" style="z-index:-1;" class="tetris" usemap="#menumap">
+<a class="select button best" href="/worldmap"></a>
+</body>
+</html>

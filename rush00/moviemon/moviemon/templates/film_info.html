@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" media="all" href="../static/style.css" />
+    <title>Film</title>
+</head>
+<body>
+<div>Poster: <img src="{{ film.poster }}"></div>
+<div>Title: {{film.title}}</div>
+<div>Director: {{film.director}}</div>
+<div>Year: {{film.year}}</div>
+<div>Rating: {{film.imdbRating}}</div>
+<div>Plot: {{film.plot}}</div>
+<div>Actors: {{film.actors}}</div>
+<a class="buttonB button best" href="/moviedex"></a>
+<img src="../static/gamebo2.png" style="z-index:-1;" class="tetris" usemap="#menumap">
+</body>
+</html>

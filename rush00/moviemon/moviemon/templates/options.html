@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" media="all" href="../static/style.css" />
+    <title>Options</title>
+</head>
+<body>
+<div>length: {{ variables.length }}</div>
+<div>width: {{ variables.width }}</div>
+<div>playerX: {{ variables.x }}</div>
+<div>playerY: {{ variables.y }}</div>
+{% for film in variables.films %}
+    <div>{{ film.title }}</div>
+{% endfor %}
+<a class="start button best" href="/worldmap"></a>
+<a class="buttonB button best" href="/"></a>
+<a class="buttonA button best" href="/options/save_game"></a>
+<img src="../static/gamebo2.png" style="z-index:-1;" class="tetris" usemap="#menumap">
+</body>
+</html>

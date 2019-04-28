@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" media="all" href="{% static 'style.css' %}" />
+    <title>CCMN</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+        li {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: blue;
+            position: relative;
+            display: inline-block;
+        }
+        li:hover {
+            background: red;
+        }
+        li > span {
+            display: none;
+            position: absolute;
+            left: 20px;
+            background: red;
+        }
+        li:hover > span {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<p>{{ floor }}</p>
+<p>{{ count }}</p>
+
+<div style="position: relative;">
+    <ul>
+        <li style="left: {{ x }}px; top: {{ y }}px;"><span>test</span></li>
+    </ul>
+
+    <img src="../static/1st_Floor.png">
+</div>
+</body>
+</html>

@@ -11,15 +11,15 @@ from django.views.generic import TemplateView
 from shutil import copyfileobj
 import os
 
-user = 'RO'
+userName = 'RO'
 password = 'just4reading'
 
 class ciscoAPI(TemplateView):
 
-    def __init__(self, user, password):
+    def __init__(self, user, password, url):
         self.__user = user
         self.__password = password
-        self.__host = 'https://cisco-cmx.unit.ua'
+        self.__host = url
         self.__auth = HTTPBasicAuth(self.__user, self.__password)
 
     def request_get(self, url):
@@ -52,10 +52,20 @@ class ciscoAPI(TemplateView):
             return 1
         else:
             return -1
+    def request_file1(self, url, file_name):
+        response = requests.get(
+            url=self.__host + url,
+            auth=self.__auth,
+            verify=False,
+            stream=True
+        )
+        return response.content
+
 
 
 def index(request):
-    client = ciscoAPI(user, password)
+    client = ciscoAPI(userName, password, 'https://cisco-cmx.unit.ua')
+    client2 = ciscoAPI(userName, 'Passw0rd', 'https://cisco-presence.unit.ua')
 
     print("____________________________________________")
     print("con: ", client.request_get('/api/analytics/v1/now/connectedDetected')['total']['totalConnected'])
@@ -71,10 +81,27 @@ def index(request):
             for floor in build['floorCounts']:
                 print(floor['floorName'])
                 client.request_file('/api/config/v1/maps/image/' + campus['campusName'] + '/' + build['buildingName'] + '/' + floor['floorName'], floor['floorName'])
+                kk = client.request_file1('/api/config/v1/maps/image/' + campus['campusName'] + '/' + build['buildingName'] + '/' + floor['floorName'], floor['floorName'])
+    users = client.request_get('/api/location/v2/clients')
+    #print(users)
+    #print(len(users))
+    #users = client.request_get('/api/location/v1/attributes')
+    #print(users)
+    #with open('test.txt', 'w') as f:
+    #    f.write(json.dumps(users))
+    for user in users:
+        print(user['macAddress'], user['userName'])
+    print(len(users))
+    # macAddress
+    # mapInfo -> mapHierarchyString
+    # mapCoordinate -> x
+    # mapCoordinate -> y
+    # userName
+    # ssId
+    # manufacturer
 
 
-    print(client.request_get('/api/location/v1/history/clients/'))
-
+    # networkStatus
     print("____________________________________________")
 
     print("____________________________________________")
@@ -83,7 +110,10 @@ def index(request):
 
     print("____________________________________________")
 
-    return HttpResponse("test")
+    return render(request, 'index.html', {'floor': "1",
+                                          'count': 'kk',
+                                          'img': kk
+                                          })
     #template = loader.get_template('index.html')
     #context = {
     #    'test': 't42'

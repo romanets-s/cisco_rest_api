@@ -10,6 +10,8 @@ from django.views.generic import TemplateView
 #from .models import Users2
 from shutil import copyfileobj
 import os
+from django.shortcuts import redirect
+import datetime
 
 userName = 'RO'
 password = 'just4reading'
@@ -29,7 +31,10 @@ class ciscoAPI(TemplateView):
             verify=False
         )
         if response.status_code == 200:
-            return json.loads(response.content)
+            try:
+                return json.loads(response.content)
+            except:
+                return None
         print(response.status_code, url)
         return None
 
@@ -41,9 +46,10 @@ class ciscoAPI(TemplateView):
             stream=True
         )
         if response.status_code == 200:
-            if not os.path.exists('maps'):
-                os.makedirs('maps')
-            full_path = os.path.join('maps', file_name + '.png')
+            dir_for_maps = 'ccmn/static'
+            if not os.path.exists(dir_for_maps):
+                os.makedirs(dir_for_maps)
+            full_path = os.path.join(dir_for_maps, file_name + '.png')
             if os.path.exists(full_path):
                 return 1
             with open(full_path, 'wb') as f:
@@ -54,71 +60,101 @@ class ciscoAPI(TemplateView):
             return -1
 
 
-def index(request):
-    client = ciscoAPI(userName, password, 'https://cisco-cmx.unit.ua')
-    client2 = ciscoAPI(userName, 'Passw0rd', 'https://cisco-presence.unit.ua')
+client = ciscoAPI(userName, password, 'https://cisco-cmx.unit.ua')
+client2 = ciscoAPI(userName, 'Passw0rd', 'https://cisco-presence.unit.ua')
+current_floor = ''
+floors = []
+xlogin = ''
+now = datetime.datetime.now()
+date_from = now.strftime("%Y-%m-%d")
+date_to = now.strftime("%Y-%m-%d")
 
-    print("____________________________________________")
-    print("con: ", client.request_get('/api/analytics/v1/now/connectedDetected')['total']['totalConnected'])
-    print("det: ", client.request_get('/api/analytics/v1/now/connectedDetected')['total']['totalDetected'])
-    print("all: ", client.request_get('/api/analytics/v1/now/connectedDetected')['total']['totalAll'])
-    print("____________________________________________")
+def statistics(request):
+    if request.method == 'GET' and request.GET and not 'from' in request.GET:
+        global current_floor, xlogin
+        if 'floor' in request.GET:
+            current_floor = request.GET['floor']
+        elif 'xlogin' in request.GET:
+            xlogin = request.GET['xlogin']
+        return redirect('index')
+    global client, client2, date_to, date_from
+    connected = client.request_get('/api/analytics/v1/now/connectedDetected')
+    total_all = connected['total']['totalAll']
+    if request.method == 'GET' and request.GET:
+        date_from = datetime.datetime.strptime(request.GET['from'], "%m/%d/%Y").strftime("%Y-%m-%d")
+        date_to = datetime.datetime.strptime(request.GET['to'], "%m/%d/%Y").strftime("%Y-%m-%d")
+
+    siteId = client2.request_get('/api/config/v1/sites')[0]['aesUidString']
+    repeat_vis = client2.request_get('/api/presence/v1/repeatvisitors/count?siteId=' + siteId + '&startDate=' + date_from + '&endDate=' + date_to)
+    dwell = client2.request_get('/api/presence/v1/dwell/count?siteId=' + siteId + '&startDate=' + date_from + '&endDate=' + date_to)
+    correlation = client2.request_get('/api/presence/v1/connected/daily?siteId=' + siteId + '&startDate=2017-12-22&endDate=' + datetime.datetime.now().strftime("%Y-%m-%d"))
+    cor_list_val = []
+    cor_list_key = []
+    for cor in correlation:
+        cor_list_key.append(str(cor))
+        cor_list_val.append(correlation[cor])
+    tomorrow = {'FIVE_TO_THIRTY_MINUTES': [], 'THIRTY_TO_SIXTY_MINUTES': [], 'ONE_TO_FIVE_HOURS': [], 'FIVE_TO_EIGHT_HOURS': [], 'EIGHT_PLUS_HOURS': []}
+    date_start = datetime.datetime.strptime('12/31/2017', "%m/%d/%Y").strftime("%Y-%m-%d")
+    dwell_raw = client2.request_get('/api/presence/v1/dwell/count/lastmonth?siteId=' + siteId)
+    print(dwell_raw)
+    #for dw in dwell_raw:
+    #    for dd in tomorrow:
+    #       tomorrow[dd].append(dw[dd])
+    print(len(tomorrow['FIVE_TO_THIRTY_MINUTES']))
+
+
+    print(siteId)
+    return render(request, 'statistics.html', {'all': total_all,
+                                               'repeat': repeat_vis,
+                                               'dwell': dwell,
+                                               'cor_val': list(cor_list_val),
+                                               'cor_key': list(cor_list_key),
+                                               })
+
+def index(request):
+    global current_floor, client, floors, xlogin
+    search_form = ''
+    if request.method == 'GET' and request.GET:
+        if 'floor' in request.GET:
+            current_floor = request.GET['floor']
+        elif 'xlogin' in request.GET:
+            print(xlogin)
+            xlogin = request.GET['xlogin']
+        return redirect('index')
+    connected = client.request_get('/api/analytics/v1/now/connectedDetected')
+    total_con = connected['total']['totalConnected']
+    total_det = connected['total']['totalDetected']
+    total_all = connected['total']['totalAll']
 
     campus_map = client.request_get('/api/config/v1/maps/count')
     for campus in campus_map['campusCounts']:
-        print(campus['campusName'])
         for build in campus['buildingCounts']:
-            print(build['buildingName'])
             for floor in build['floorCounts']:
-                print(floor['floorName'])
+                floors.append(floor['floorName'])
+                if not current_floor:
+                    current_floor = floor['floorName']
                 client.request_file('/api/config/v1/maps/image/' + campus['campusName'] + '/' + build['buildingName'] + '/' + floor['floorName'], floor['floorName'])
     users = client.request_get('/api/location/v2/clients')
-    #print(users)
-    #print(len(users))
-    #users = client.request_get('/api/location/v1/attributes')
-    #print(users)
-    #with open('test.txt', 'w') as f:
-    #    f.write(json.dumps(users))
-    usersData = []
+    users_data = []
     for user in users:
-        print(user['macAddress'], user['userName'])
         if user['macAddress'] and user['mapCoordinate']:
-            usersData.append({'macAddress': user['macAddress'],
-                              'x': user['mapCoordinate']['x'],
-                              'y': user['mapCoordinate']['y'],
-                              'userName': user['userName'],
-                              })
-            print(user['mapInfo']['mapHierarchyString'])
-            print(user['mapCoordinate'])
-            x = user['mapCoordinate']['x']
-            y = user['mapCoordinate']['y']
-    print(len(users))
-    # macAddress
-    # mapInfo -> mapHierarchyString
-    # mapCoordinate -> x
-    # mapCoordinate -> y
-    # userName
-    # ssId
-    # manufacturer
-
-
-    # networkStatus
-    print("____________________________________________")
-
-    print("____________________________________________")
-
-    print("____________________________________________")
-
-    print("____________________________________________")
-
-    return render(request, 'index.html', {'floor': "1",
-                                          'count': 'kk',
-                                          'x': x + 50,
-                                          'y': y + 70,
+            users_data.append({'macAddress': user['macAddress'],
+                               'x': user['mapCoordinate']['x'],
+                               'y': user['mapCoordinate']['y'],
+                               'userName': user['userName'],
+                               'manufacturer': user['manufacturer'],
+                               'floor': user['mapInfo']['mapHierarchyString'],
+                               })
+            if xlogin:
+                search_form = 'not found'
+                if xlogin.lower() == user['userName'].lower() or xlogin.lower() == user['macAddress'].lower():
+                    for floor in floors:
+                        if floor in user['mapInfo']['mapHierarchyString']:
+                            current_floor = floor
+                    search_form = user['macAddress']
+    xlogin = ''
+    return render(request, 'index.html', {'all': total_all,
+                                          'users': users_data,
+                                          'current_floor': current_floor,
+                                          'search_form': search_form,
                                           })
-    #template = loader.get_template('index.html')
-    #context = {
-    #    'test': 't42'
-    #}
-    #return HttpResponse(template.render(context, request))
-    # 769.77216, 'y': 246.13196,

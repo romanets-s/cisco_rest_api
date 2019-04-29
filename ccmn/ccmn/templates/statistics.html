@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script type='text/javascript' src='//code.jquery.com/jquery-1.8.3.js'></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker3.min.css">
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+
+    <script type='text/javascript'>
+$(function(){
+$('.input-daterange').datepicker({
+    autoclose: true
+});
+});
+
+</script>
+     <style>
+        ul {
+            list-style: none;
+        }
+        ul.user {
+            position: absolute;
+        }
+        ul.menu {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          background-color: #333;
+          width: 100%;
+        }
+
+        ul.menu > li {
+          float: left;
+        }
+
+        ul.menu li a, ul.menu li span{
+          display: block;
+          color: white;
+          text-align: center;
+          padding: 16px 16px;
+          text-decoration: none;
+        }
+
+        ul.menu > li a:hover {
+          background-color: #111;
+        }
+        ul.user > li {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: blue;
+            position: absolute;
+            display: inline-block;
+        }
+        ul.user > li:hover {
+            background: red;
+        }
+        ul.user > li > div {
+            display: none;
+            position: absolute;
+            left: 20px;
+            background: rgba(0, 255, 0, 0.7);
+            font: 16px serif;
+            color: black;
+        }
+        ul.user > li:hover > div, ul.user > li > div.search-form {
+            display: block;
+        }
+        .user-info {
+            width: 250px;
+            padding: 10px;
+            border-radius: 20px;
+        }
+        .map {
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+        }
+
+    </style>
+    <title>Statistics</title>
+</head>
+<body>
+<ul class="menu">
+    <li><a href="?floor=1st_Floor">Floor 1</a></li>
+    <li><a href="?floor=2nd_Floor">Floor 2</a></li>
+    <li><a href="?floor=3rd_Floor">Floor 3</a></li>
+    <li><a href="/statistics">Statistics</a></li>
+    <li><span>Total Visitors: {{ all }} </span></li>
+    <li>
+ <form style="padding-top:10px;" method="GET" style="display:inline-block;">
+     <div class="form-row align-items-center">
+         <div class="col-auto">
+    <input type="text" class="form-control mb-2" name="xlogin" placeholder="Enter xlogin">
+         </div>
+    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+     </div>
+ </form>
+    </li>
+
+</ul>
+
+<div class="container">
+<h1>Select date</h1>
+<form>
+<div style="float:left; width: 90%;" class="input-daterange input-group" id="datepicker">
+
+    <input type="text" class="input-sm form-control" name="from" placeholder="From date"/>
+    <span class="input-group-addon">to</span>
+    <input type="text" class="input-sm form-control" name="to" placeholder="To date"/>
+</div>
+<button style="display: inline-block; margin: -3px 0 5px 5px;" type="submit" class="btn btn-primary mb-2">Select</button>
+</form>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+
+    <h1>Repeat Visitors Distribution</h1>
+<canvas id="repeat"></canvas>
+<script>
+  var ctxP = document.getElementById("repeat").getContext('2d');
+  var myPieChart = new Chart(ctxP, {
+    type: 'pie',
+    data: {
+      labels: ["Daily", "Weekly", "Occasional", "First time", "Yesterday"],
+      datasets: [{
+        data: [{{ repeat.DAILY }}, {{ repeat.WEEKLY }}, {{ repeat.OCCASIONAL }}, {{ repeat.FIRST_TIME }}, {{ repeat.YESTERDAY }}],
+        backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+        hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+</script>
+    </div>
+    <div class="col-sm">
+    <h1>Repeat Visitors Distribution</h1>
+<canvas id="dwell"></canvas>
+<script>
+  var ctxP = document.getElementById("dwell").getContext('2d');
+  var myPieChart = new Chart(ctxP, {
+    type: 'pie',
+    data: {
+      labels: ["5-30 min", "30-60 min", "1-5 hours", "5-8 hours", "8+ hours"],
+      datasets: [{
+        data: [{{ dwell.FIVE_TO_THIRTY_MINUTES }}, {{ dwell.THIRTY_TO_SIXTY_MINUTES }}, {{ dwell.ONE_TO_FIVE_HOURS }}, {{ dwell.FIVE_TO_EIGHT_HOURS }}, {{ dwell.EIGHT_PLUS_HOURS }}],
+        backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+        hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+</script>
+    </div>
+    <div class="col-sm">
+      <canvas id="daily"></canvas>
+        <script>
+  //line
+  var ctxL = document.getElementById("daily").getContext('2d');
+  var myLineChart = new Chart(ctxL, {
+    type: 'line',
+    data: {
+      labels: {{ cor_key|safe }},
+      datasets: [{
+          label: "Correlation",
+          data: {{ cor_val }},
+          backgroundColor: [
+            'rgba(105, 0, 132, .2)',
+          ],
+          borderColor: [
+            'rgba(200, 99, 132, .7)',
+          ],
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+</script>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+</div>
+</body>
+</html>

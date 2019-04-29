@@ -93,16 +93,6 @@ def statistics(request):
     for cor in correlation:
         cor_list_key.append(str(cor))
         cor_list_val.append(correlation[cor])
-    tomorrow = {'FIVE_TO_THIRTY_MINUTES': [], 'THIRTY_TO_SIXTY_MINUTES': [], 'ONE_TO_FIVE_HOURS': [], 'FIVE_TO_EIGHT_HOURS': [], 'EIGHT_PLUS_HOURS': []}
-    date_start = datetime.datetime.strptime('12/31/2017', "%m/%d/%Y").strftime("%Y-%m-%d")
-    dwell_raw = client2.request_get('/api/presence/v1/dwell/count/lastmonth?siteId=' + siteId)
-    print(dwell_raw)
-    #for dw in dwell_raw:
-    #    for dd in tomorrow:
-    #       tomorrow[dd].append(dw[dd])
-    print(len(tomorrow['FIVE_TO_THIRTY_MINUTES']))
-
-
     print(siteId)
     return render(request, 'statistics.html', {'all': total_all,
                                                'repeat': repeat_vis,

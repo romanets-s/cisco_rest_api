@@ -4,6 +4,6 @@ Django==2.0.6
 idna==2.7
 pip==10.0.1
 pytz==2018.4
-requests==2.19.1
+requests==2.20.0
 setuptools==39.2.0
 urllib3==1.23
